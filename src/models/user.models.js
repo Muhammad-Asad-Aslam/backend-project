@@ -11,7 +11,7 @@ const userSchhema = new mongoose.Schema({
         trim: true,
         index: true
     },
-    eamil: {
+    email: {
         type: String,
         required: true,
         unique: true,
@@ -60,7 +60,7 @@ userSchhema.methods.isPasswordCorrect = async function (password) {
 userSchhema.methods.generateAccessToken = function () {
     return jwt.sign({
         _id: this._id,
-        email: this.eamil,
+        email: this.email,
         username: this.username,
         fullName: this.fullName
     },
