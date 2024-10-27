@@ -7,16 +7,21 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const generateTokens = async (userId) => {
     try {
         const user = await User.findById(userId)
-        const accessToke = user.genrateAccessToken()
-        const refreshToken = user.genrateRefreshToken()
+        console.log(userId);
+
+        const accessToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
+
+
 
         user.refreshToken = refreshToken
-        await user.save({ validateBeforeSave: false })
+        user.accessToken = accessToken
+        console.log("refreshToken:", user.refreshToken, "accessToken:", user.accessToken);
 
-        return { accessToke, refreshToken }
+        return { accessToken, refreshToken }
 
     } catch (error) {
-        throw new ApiError(500, "ERROR OCCURED WHILE GENERATIONG TOKENS")
+        throw new ApiError(500, "ERROR OCCURED WHILE GENERATING TOKENS")
     }
 }
 
@@ -92,7 +97,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const { email, username, password } = req.body
 
-    if (!username || !email) {
+    if (!(username || email)) {
         throw new ApiError(400, "USERNAME OR EMAIL REQUIRED")
     }
 
@@ -107,7 +112,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const passwordValidation = await user.isPasswordCorrect(password)
 
     if (!passwordValidation) {
-        throw new ApiError(404, "INVALID USER CREDENTIALS")
+        throw new ApiError(404, "PASSWORD INVALID")
     }
 
     const { accessToken, refreshToken } = await generateTokens(user._id)
@@ -152,7 +157,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     return res.
         status(200)
         .clearCookie("refreshToken", option)
-        .clearCookie("accessTokenToken", option)
+        .clearCookie("accessToken", option)
         .json(new ApiResponse(200), {}, "USER LOGGED OUT SUCCESSFULLY")
 })
 
